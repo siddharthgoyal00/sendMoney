@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+mongoose.connect("mongodb+srv://admin:fvmQ1D2B6iDKmUM6@cluster0.ztkcnap.mongodb.net/");
 const userSchema = new mongoose.Schema({
 
     username: {
@@ -34,7 +35,15 @@ const userSchema = new mongoose.Schema({
     }
 
 });
+/*  simple solution 
+const userSchema = new mongoose.Schema({
+username : String,
+password : String,
+firstName : String,
+lastName : String
+})
 
+*/
 const User = mongoose.model('User', userSchema);
 module.exports ={
     User
