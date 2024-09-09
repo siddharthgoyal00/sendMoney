@@ -2,6 +2,7 @@ import express from "express";
 import {z} from "zod";
 import {User} from "../db";
 import {JWT_SECRET} from "jsonwebtoken";
+import {authMiddleware} from "../middleware";
 const router =  express.Router();  // define routes for handeling req
 
 
@@ -82,6 +83,53 @@ res.status(411).json({
 
   
 });
+const updateBody = z.object({
+	password: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+})
+
+router.put("/", authMiddleware, async (req, res) => {
+    const parseed = updateBody.safeParse(req.body)
+    if (!parseed.success) {
+        res.status(411).json({
+            message: "Error while updating information"
+        })
+    }
+
+    await User.updateOne(req.body, {
+        id: req.userId
+    })
+
+    res.json({
+        message: "Updated successfully"
+    })
+})
+
+router.get("/bulk", async (req, res) => {
+    const filter = req.query.filter || "";
+
+    const users = await User.find({
+        $or: [{
+            firstName: {
+                "$regex": filter
+            }
+        }, {
+            lastName: {
+                "$regex": filter
+            }
+        }]
+    })
+
+    res.json({
+        user: users.map(user => ({
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            _id: user._id
+        }))
+    })
+})
 
 module.exports = router;
 
