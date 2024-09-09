@@ -1,42 +1,46 @@
-import {express} from "express";
-import {zod} from "zod";
+import express from "express";
+import {z} from "zod";
 import {User} from "../db";
 import {JWT_SECRET} from "jsonwebtoken";
-const router =  express.Router();
+const router =  express.Router();  // define routes for handeling req
 
-//======================== zod schema for the incomming user =========================
-const signUpSchema = zod.object({
-    username:  zod.string().email(),
-    password:  zod.string(),
-    firstName: zod.string(),
-    lastName:  zod.string()
+
+const signUpSchema = z.object({    // validation schema for signup
+    username:  z.string().email(),
+    password:  z.string(),
+    firstName: z.string(),
+    lastName:  z.string()
 })
 
-// make sure the schema is valid 
-router.post("/signup", async (req,res)=>{
-  const body = req.body();
-  const {success} = signUpSchema.safeParse(req.body);
-  if (!success){
+
+router.post("/signup", async (req,res)=>{   // this route handel user registration 
+ 
+  const parsed = signUpSchema.safeParse(req.body);   // safeparse is by zod liberary gives success : true,false   , data , error
+  if (!parsed.success){
     return res.json({
         msg: "wrong inputs / Email already taken"
     })
   }
 
-  // check weather the user exist or not 
-  const user  = User.findOne({
-       username :  body.username 
+   
+  const existingUser  =await User.findOne({
+       username :  req.body.username 
  })
 
- if(user._id){
+ if(existingUser){
     return res.json({
         msg: "wrong inputs / Email already taken"
     })
  }
 
- const dbUser = await User.create (body);
- const token = jwt.sign({
-  userId : dbUser._id
- }, JWT_SECRET)
+ const user = await User.create ({  // cerate the new user in the  database with the given info 
+    username: req.body.username,
+    password: req.body.password,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+ })
+ const userId = user._id; // retrieve the user id given by the mongodb _id to each user 
+ const token = jwt.sign({userId }, JWT_SECRET) // creates the jwt token using their id and the secret key
 res.json({
   msg: "user created successfully",
   token: token 
@@ -44,29 +48,29 @@ res.json({
  
 });
 
-const signInSchema = zod.objects({
-  username: zod.string().email(),
-  password: zod.string()
+const signInSchema = z.object({  //  validation schema for the singin 
+  username: z.string().email(),
+  password: z.string()
 })
 
-router.post("/signin", async(req,res)=>{
-  const {success} = signInSchema.safeParse(req.body);
-  if(!success){
+router.post("/signin", async(req,res)=>{  // this route will handel the user login 
+  const parsed = signInSchema.safeParse(req.body);
+  if(!parsed.success){
       return res.json({
         msg:"input incorrect"
       })
   }
-  const user = await User.findOne({
-    username: req.body.username,
+  const user = await User.findOne({   // finds the exixting user with the given credentials 
+        username: req.body.username,
         password: req.body.password
   });
   if (user) {
     const token = jwt.sign({
-        userId: user._id
-    }, JWT_SECRET);
+        userId: user._id // this is the pAY LOAD
+    }, JWT_SECRET); // A SECRET KEY USED FOR digitally sign the token
 
     res.json({
-        token: token
+        token: token // this will be store in the local storage , session storage or the secure cookie 
     })
     return;
 }
