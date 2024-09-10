@@ -1,9 +1,10 @@
 import express from "express";
 import {z} from "zod";
-import {User} from "../db";
-import {JWT_SECRET} from "jsonwebtoken";
-import {authMiddleware} from "../middleware";
-const router =  express.Router();  // define routes for handeling req
+import {User,Account} from "../db.js";
+import {JWT_SECRET} from "../config.js";
+import {authMiddleware} from "../middleware.js";
+import jwt from "jsonwebtoken";
+const userRouter =  express.Router();  // define routes for handeling req
 
 
 const signUpSchema = z.object({    // validation schema for signup
@@ -14,45 +15,47 @@ const signUpSchema = z.object({    // validation schema for signup
 })
 
 
-router.post("/signup", async (req,res)=>{   // this route handel user registration 
+userRouter.post("/signup", async (req,res)=>{  
+    console.log(req.headers);
+    console.log(req.body); // this route handle user registration 
  
-  const parsed = signUpSchema.safeParse(req.body);   // safeparse is by zod liberary gives success : true,false   , data , error
-  if (!parsed.success){
-    return res.json({
+  const parsed = signUpSchema.safeParse(req.body);  
+  console.log(parsed.error) // safeparse is by zod liberary gives success : true,false   , data , error
+  if (!parsed.success && !req.body){
+    res.json({
         msg: "wrong inputs / Email already taken"
     })
   }
 
-   
-  const existingUser  =await User.findOne({
-       username :  req.body.username 
- })
-
- if(existingUser){
-    return res.json({
-        msg: "wrong inputs / Email already taken"
-    })
- }
-
- const user = await User.create ({  // cerate the new user in the  database with the given info 
-    username: req.body.username,
-    password: req.body.password,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
- })
- const userId = user._id; // retrieve the user id given by the mongodb _id to each user 
- 
- await Account.create({ // this will user  a initial balance from 1 to 10000 at the time of signup
-  userId,
-  balance: 1 + Math.random() * 10000
-})
-
- const token = jwt.sign({userId }, JWT_SECRET) // creates the jwt token using their id and the secret key
-res.json({
-  msg: "user created successfully",
-  token: token 
-})
- 
+  else{
+    const existingUser  =await User.findOne({
+        username :  req.body.username 
+  })
+  if(existingUser){
+    res.json({
+       msg: "wrong inputs / Email already taken"
+   })
+    }else{
+        const user = await User.create ({  // cerate the new user in the  database with the given info 
+            username: req.body.username,
+            password: req.body.password,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+         })
+         const userId = user._id; // retrieve the user id given by the mongodb _id to each user 
+         
+         await Account.create({ // this will user  a initial balance from 1 to 10000 at the time of signup
+          userId,
+          balance: 1 + Math.random() * 10000
+        })
+        
+         const token = jwt.sign({userId }, JWT_SECRET) // creates the jwt token using their id and the secret key
+        res.json({
+          msg: "user created successfully",
+          token: token 
+        })
+    }
+  } 
 });
 
 const signInSchema = z.object({  //  validation schema for the singin 
@@ -60,7 +63,7 @@ const signInSchema = z.object({  //  validation schema for the singin
   password: z.string()
 })
 
-router.post("/signin", async(req,res)=>{  // this route will handel the user login 
+userRouter.post("/signin", async(req,res)=>{  // this route will handel the user login 
   const parsed = signInSchema.safeParse(req.body);
   if(!parsed.success){
       return res.json({
@@ -95,7 +98,7 @@ const updateBody = z.object({
     lastName: z.string().optional(),
 })
 
-router.put("/", authMiddleware, async (req, res) => {
+userRouter.put("/", authMiddleware, async (req, res) => {
     const parseed = updateBody.safeParse(req.body)
     if (!parseed.success) {
         res.status(411).json({
@@ -112,7 +115,7 @@ router.put("/", authMiddleware, async (req, res) => {
     })
 })
 
-router.get("/bulk", async (req, res) => {
+userRouter.get("/bulk", async (req, res) => {
     const filter = req.query.filter || "";
 
     const users = await User.find({
@@ -137,6 +140,6 @@ router.get("/bulk", async (req, res) => {
     })
 })
 
-module.exports = router;
+ export default userRouter;
 
 
