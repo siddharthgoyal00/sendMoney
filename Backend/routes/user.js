@@ -41,6 +41,12 @@ router.post("/signup", async (req,res)=>{   // this route handel user registrati
     lastName: req.body.lastName,
  })
  const userId = user._id; // retrieve the user id given by the mongodb _id to each user 
+ 
+ await Account.create({ // this will user  a initial balance from 1 to 10000 at the time of signup
+  userId,
+  balance: 1 + Math.random() * 10000
+})
+
  const token = jwt.sign({userId }, JWT_SECRET) // creates the jwt token using their id and the secret key
 res.json({
   msg: "user created successfully",
@@ -121,8 +127,8 @@ router.get("/bulk", async (req, res) => {
         }]
     })
 
-    res.json({
-        user: users.map(user => ({
+    res.json({   //  logedin user can see all the existing user 
+        user: users.map(user => ({  // we should not return a password 
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,

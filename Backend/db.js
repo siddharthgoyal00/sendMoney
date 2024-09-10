@@ -10,15 +10,13 @@ const userSchema = new mongoose.Schema({
      lowerCase: true,
      trim: true,
      minLength: 3,
-     maxLength: 8,
+     maxLength: 30,
     },
 
     password:{
      type:String,
      required:true,
-     minLength:8,
-     maxLength:20
-
+     minLength:6,
     },
 
     firstName:{ 
@@ -35,6 +33,19 @@ const userSchema = new mongoose.Schema({
     }
 
 });
+const accountSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId, // Reference to User model
+        ref: 'User',
+        required: true
+    },
+    balance: {
+        type: Number,
+        required: true
+    }
+});
+
+
 /*  simple solution 
 const userSchema = new mongoose.Schema({
 username : String,
@@ -44,7 +55,10 @@ lastName : String
 })
 
 */
+const Account = mongoose.model('Account', accountSchema);
+
 const User = mongoose.model('User', userSchema);
 module.exports ={
-    User
+    User,
+    Account,
 };
