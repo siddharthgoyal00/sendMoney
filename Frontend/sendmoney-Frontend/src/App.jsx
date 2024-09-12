@@ -4,7 +4,7 @@ import {
   Routes,
 } from "react-router-dom";
 import {Signin} from "./pages/Signin.jsx"
-import { Signup } from "./pages/Signup";
+import { Signup } from "./pages/signup";
 import {Dashboard} from "./pages/Dashboard";
 import { MoneyTransfer } from "./pages/MoneyTransfer";
 function App() {
