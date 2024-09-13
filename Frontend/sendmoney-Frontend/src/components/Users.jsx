@@ -1,9 +1,9 @@
 
-
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"
 import { Button } from "./Button"
 import axios from "axios";
+
 export const Users = () => {
     // Replace with backend call
     const [users, setUsers] = useState([]);
@@ -47,7 +47,7 @@ function User({user}) {
 
         <div className="flex flex-col justify-center h-full">
             <Button onClick={(e)=>{
-            navigate("/MoneyTransfer?id=" + user._id +  "&name=" + user.firstName)
+            navigate("/MoneyTransfer?id=" + user._id +  "&name=" + user.firstName);
             }} label={"Send Money"} />
         </div>
     </div>

@@ -6,6 +6,7 @@ import { Heading } from "../components/Heading"
 import { InputBox } from "../components/InputBox"
 import { SubHeading } from "../components/SubHeading"
 import {useNavigate} from "react-router-dom";
+
 export const Signup = () => {
 
    const [firstName, SetfirstName] = useState("");
