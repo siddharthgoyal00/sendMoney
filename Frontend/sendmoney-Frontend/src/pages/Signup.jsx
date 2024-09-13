@@ -31,6 +31,8 @@ export const Signup = () => {
             });
              localStorage.setItem("token", response.data.token) 
               // this for the persistent login on the browser for all the further req
+              // this will remove the token 
+              //localStorage.remove.Item("token")
           }} label={"Sign up"} />
         </div>
         <BottomWarning label={"Already have an account?"} buttonText={"Sign in"} to={"/signin"} />
