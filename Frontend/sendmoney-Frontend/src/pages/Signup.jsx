@@ -5,12 +5,14 @@ import { Button } from "../components/Button"
 import { Heading } from "../components/Heading"
 import { InputBox } from "../components/InputBox"
 import { SubHeading } from "../components/SubHeading"
-
+import {useNavigate} from "react-router-dom";
 export const Signup = () => {
+
    const [firstName, SetfirstName] = useState("");
    const [lastName, SetlastName] = useState("");
    const [username, SetUsername] = useState("");
    const [password, SetPassword] = useState("");
+   const navigate= useNavigate();
   
     return <div className="bg-slate-300 h-screen flex justify-center">
     <div className="flex flex-col justify-center">
@@ -30,6 +32,7 @@ export const Signup = () => {
               password: password
             });
              localStorage.setItem("token", response.data.token) 
+             navigate("/dashboard");
               // this for the persistent login on the browser for all the further req
               // this will remove the token 
               //localStorage.remove.Item("token")
